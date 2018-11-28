@@ -27,19 +27,26 @@ io.on('connection', (client) => {
     // Notificar a todos los usuarios (de la sala de chat), las personas conectadas
     client.broadcast.to(data.sala).emit('listaPersona', usuarios.getPersonasPorSala(data.sala));
 
+    // Notificar a los usuarios conectados el usuario que se desconectó
+    client.broadcast.to(data.sala).emit(
+      'crearMensaje', crearMensaje('Administrador', `${ data.nombre } se unió`)
+    );
+
     // Enviar personas conectadas
     callback(usuarios.getPersonasPorSala(data.sala));
 
   })
 
   // Escucha mensaje de cualquier usuario y lo muestra a todos los usuarios
-  client.on('crearMensaje', (data) => {
+  client.on('crearMensaje', (data, callback) => {
 
     let persona = usuarios.getPersona(client.id);
     let mensaje = crearMensaje(persona.nombre, data.mensaje);
 
     // Enviar mensaje a todos los usuarios (de la sala de chat)
-    client.broadcast.to(persona.sala).emit('crearMensaje', mensaje);
+    client.broadcast.to(persona.sala).emit('crearMensaje', mensaje);    
+
+    callback( mensaje );
 
   })
 
